@@ -19,15 +19,21 @@ export default function Generate() {
 
   const [filteredIcons, setFilteredIcons] = useState([]);
 
+  // Handle cloud provider selection
+  const handleProviderSelect = (provider) => {
+    setFormData((prev) => {
+      const cloudProviders = prev.cloudProviders.includes(provider)
+        ? prev.cloudProviders.filter((p) => p !== provider)
+        : [...prev.cloudProviders, provider];
+      return { ...prev, cloudProviders };
+    });
+    setFilteredIcons(filterIcons(formData.cloudProviders, formData.iconSearch));
+  };
+
+  // Handle general input change
   const handleChange = (e) => {
-    const { name, value, options } = e.target;
-    if (name === 'cloudProviders') {
-      const selectedOptions = Array.from(options)
-        .filter((option) => option.selected)
-        .map((option) => option.value);
-      setFormData({ ...formData, cloudProviders: selectedOptions });
-      setFilteredIcons(filterIcons(selectedOptions, formData.iconSearch));
-    } else if (name === 'iconSearch') {
+    const { name, value } = e.target;
+    if (name === 'iconSearch') {
       setFormData({ ...formData, iconSearch: value });
       setFilteredIcons(filterIcons(formData.cloudProviders, value));
     } else {
@@ -35,6 +41,7 @@ export default function Generate() {
     }
   };
 
+  // Handle icon selection
   const handleIconSelect = (icon) => {
     setFormData((prev) => {
       const icons = prev.icons.includes(icon)
@@ -44,6 +51,15 @@ export default function Generate() {
     });
   };
 
+  // Remove selected icon
+  const handleIconRemove = (icon) => {
+    setFormData((prev) => ({
+      ...prev,
+      icons: prev.icons.filter((i) => i !== icon),
+    }));
+  };
+
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -82,24 +98,25 @@ export default function Generate() {
         {/* Cloud Providers */}
         <div className="flex flex-col mb-4">
           <label className="block text-gray-700 font-medium mb-2">Select Cloud Providers</label>
-          <select
-            name="cloudProviders"
-            value={formData.cloudProviders}
-            onChange={handleChange}
-            multiple
-            className="w-full px-4 py-2 border rounded"
-            required
-          >
+          <div className="flex flex-wrap gap-2">
             {cloudProviders.map((provider) => (
-              <option key={provider} value={provider}>
-                {provider}
-              </option>
-            ))}
-          </select>
+                <button
+                  type="button"
+                  key={provider}
+                  onClick={() => handleProviderSelect(provider)}
+                  className={`px-4 py-2 rounded border ${
+                    formData.cloudProviders.includes(provider) ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                  }`}
+                >
+                  {provider}
+                </button>
+              ))}
+
+          </div>
         </div>
 
         {/* Search Icons */}
-        <div className="flex flex-col mb-4">
+        <div className="flex flex-col mb-6">
           <label className="block text-gray-700 font-medium mb-2">Search Icons</label>
           <input
             type="text"
@@ -112,37 +129,50 @@ export default function Generate() {
         </div>
 
         {/* Necessary Icons with Checkboxes */}
-        <div className="flex flex-col mb-4">
+        <div className="flex flex-col mb-6">
           <label className="block text-gray-700 font-medium mb-2">Select Necessary Icons</label>
           <div className="max-h-60 overflow-auto border rounded p-2">
-            {filteredIcons.length > 0 ? (
-              filteredIcons.map(({ key, highlighted }) => (
-                <div key={key} className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    id={key}
-                    checked={formData.icons.includes(key)}
-                    onChange={() => handleIconSelect(key)}
-                    className="mr-2"
-                  />
-                  <label
-                    htmlFor={key}
-                    dangerouslySetInnerHTML={{ __html: highlighted }}
-                    className="text-sm"
-                  />
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No icons found. Try adjusting your search or cloud provider selection.</p>
-            )}
+          {filteredIcons.length > 0 ? (
+            filteredIcons.map(({ key, highlighted }) => (
+              <button
+                type="button"
+                key={key}
+                onClick={() => handleIconSelect(key)}
+                className={`w-full text-left px-2 py-1 mb-1 ${
+                  formData.icons.includes(key) ? 'bg-blue-100 text-black' : 'bg-yellow-100'
+                }`}
+                dangerouslySetInnerHTML={{ __html: highlighted }}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">No icons found.</p>
+          )}
+
           </div>
         </div>
 
+          {/* Selected Icons Display */}
+          {formData.icons.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {formData.icons.map((icon) => (
+              <div key={icon} className="flex items-center bg-blue-100 px-3 py-1 rounded">
+                <span>{icon}</span>
+                <button
+                  type="button"
+                  onClick={() => handleIconRemove(icon)}
+                  className="ml-2 text-red-500 font-bold"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+
         {/* Clustering Details */}
         <div className="flex flex-col mb-4">
-          <label className="block text-gray-700 font-medium mb-2">
-            How are these cloud provider resources clustered or grouped? Describe in detail
-          </label>
+          <label className="block text-gray-700 font-medium mb-2">How are these cloud provider resources clustered or grouped?</label>
           <textarea
             name="clusteringDetails"
             value={formData.clusteringDetails}
@@ -156,9 +186,7 @@ export default function Generate() {
 
         {/* Relationships */}
         <div className="flex flex-col mb-4">
-          <label className="block text-gray-700 font-medium mb-2">
-            Describe the relationships between these resources and clusters/groups
-          </label>
+          <label className="block text-gray-700 font-medium mb-2">Describe the relationships between these resources and clusters/groups</label>
           <textarea
             name="relationships"
             value={formData.relationships}
@@ -178,8 +206,8 @@ export default function Generate() {
           Generate JSON
         </button>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-6">
+         {/* Navigation Buttons */}
+         <div className="flex justify-between mt-6">
           <button
             type="button"
             className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
