@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { filterIcons } from './iconSearch';
+import Navbar from '@/components/Navbar';
+
 
 const cloudProviders = ['AWS', 'Azure', 'Google Cloud', 'IBM Cloud', 'Oracle Cloud', 'Alibaba'];
 
@@ -78,6 +80,10 @@ export default function Generate() {
 
   return (
     <div className="min-h-screen w-full p-4 bg-yellow-50 flex flex-col items-center">
+
+      {/* Navbar */}
+      <Navbar />
+
       <h1 className="text-3xl font-bold mb-6 text-center">Cloud System Architecture Generator</h1>
 
       <form onSubmit={handleSubmit} className="w-full max-w-4xl bg-yellow-100 p-5 rounded-md">
@@ -205,24 +211,6 @@ export default function Generate() {
         >
           Generate JSON
         </button>
-
-         {/* Navigation Buttons */}
-         <div className="flex justify-between mt-6">
-          <button
-            type="button"
-            className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
-            onClick={() => router.push('/editor')}
-          >
-            Go to Editor Page
-          </button>
-          <button
-            type="button"
-            className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition"
-            onClick={() => router.push('/')}
-          >
-            Go to Home Page
-          </button>
-        </div>
       </form>
     </div>
   );
