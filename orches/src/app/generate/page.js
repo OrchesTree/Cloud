@@ -1,8 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { filterIcons } from './iconSearch';
 import Navbar from '@/components/Navbar';
+
+import { generateAndSendJson } from '@/lib/generateRequest';
+import { auth } from '@/lib/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 const cloudProviders = ['AWS', 'Azure', 'Google Cloud', 'IBM Cloud', 'Oracle Cloud', 'Alibaba'];
@@ -18,6 +25,22 @@ export default function Generate() {
     relationships: '',
     iconSearch: '',
   });
+
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [svgResponse, setSvgResponse] = useState(null);
+
+
+   // Check user authentication
+   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
 
   const [filteredIcons, setFilteredIcons] = useState([]);
 
@@ -61,28 +84,42 @@ export default function Generate() {
     }));
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+   // Handle form submission
+   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const output = {
-      'Provide a title of your cloud system architecture': formData.title,
-      'Select cloud providers': formData.cloudProviders,
-      'Select resources used in this cloud system architecture': formData.icons,
-      'How are these cloud provider resources clustered or grouped? Describe in detail':
-        formData.clusteringDetails,
-      'Describe the relationships between these resources and clusters/groups':
-        formData.relationships,
-    };
+    if (!user) {
+      toast.error('Please sign in to generate the JSON.');
+      return;
+    }
 
-    alert(JSON.stringify(output, null, 2));
-  };
+    try {
+      const result = await generateAndSendJson(formData);
+      setSvgResponse(result);
+      toast.success('SVG generated and received successfully!');
+    } catch (error) {
+      toast.error(`Error: ${error.message}`);
+    }
+  }; 
 
   return (
     <div className="min-h-screen w-full p-4 bg-yellow-50 flex flex-col items-center">
 
       {/* Navbar */}
       <Navbar />
+
+      {/* Overlay when not logged in */}
+      {loading ? (
+        <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-10">
+          <p className="text-white text-2xl font-bold">Loading...</p>
+        </div>
+      ) : !user && (
+        <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-10">
+          <p className="text-white text-2xl font-bold">Please sign in to access this page.</p>
+        </div>
+      )}
+
+
 
       <h1 className="text-3xl font-bold mb-6 text-center">Cloud System Architecture Generator</h1>
 
@@ -106,17 +143,16 @@ export default function Generate() {
           <label className="block text-gray-700 font-medium mb-2">Select Cloud Providers</label>
           <div className="flex flex-wrap gap-2">
             {cloudProviders.map((provider) => (
-                <button
-                  type="button"
-                  key={provider}
-                  onClick={() => handleProviderSelect(provider)}
-                  className={`px-4 py-2 rounded border ${
-                    formData.cloudProviders.includes(provider) ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              <button
+                type="button"
+                key={provider}
+                onClick={() => handleProviderSelect(provider)}
+                className={`px-4 py-2 rounded border ${formData.cloudProviders.includes(provider) ? 'bg-blue-500 text-white' : 'bg-gray-200'
                   }`}
-                >
-                  {provider}
-                </button>
-              ))}
+              >
+                {provider}
+              </button>
+            ))}
 
           </div>
         </div>
@@ -138,27 +174,26 @@ export default function Generate() {
         <div className="flex flex-col mb-6">
           <label className="block text-gray-700 font-medium mb-2">Select Necessary Icons</label>
           <div className="max-h-60 overflow-auto border rounded p-2">
-          {filteredIcons.length > 0 ? (
-            filteredIcons.map(({ key, highlighted }) => (
-              <button
-                type="button"
-                key={key}
-                onClick={() => handleIconSelect(key)}
-                className={`w-full text-left px-2 py-1 mb-1 ${
-                  formData.icons.includes(key) ? 'bg-blue-100 text-black' : 'bg-yellow-100'
-                }`}
-                dangerouslySetInnerHTML={{ __html: highlighted }}
-              />
-            ))
-          ) : (
-            <p className="text-gray-500">No icons found.</p>
-          )}
+            {filteredIcons.length > 0 ? (
+              filteredIcons.map(({ key, highlighted }) => (
+                <button
+                  type="button"
+                  key={key}
+                  onClick={() => handleIconSelect(key)}
+                  className={`w-full text-left px-2 py-1 mb-1 ${formData.icons.includes(key) ? 'bg-blue-100 text-black' : 'bg-yellow-100'
+                    }`}
+                  dangerouslySetInnerHTML={{ __html: highlighted }}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500">No icons found.</p>
+            )}
 
           </div>
         </div>
 
-          {/* Selected Icons Display */}
-          {formData.icons.length > 0 && (
+        {/* Selected Icons Display */}
+        {formData.icons.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {formData.icons.map((icon) => (
               <div key={icon} className="flex items-center bg-blue-100 px-3 py-1 rounded">
@@ -203,7 +238,7 @@ export default function Generate() {
             required
           />
         </div>
-
+       
         {/* Submit Button */}
         <button
           type="submit"
@@ -212,6 +247,16 @@ export default function Generate() {
           Generate JSON
         </button>
       </form>
+
+      {svgResponse && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Generated SVG:</h2>
+          <div className="border p-4 rounded bg-white" dangerouslySetInnerHTML={{ __html: svgResponse }} />
+        </div>
+      )}
+
+      <ToastContainer />
+
     </div>
   );
 }
