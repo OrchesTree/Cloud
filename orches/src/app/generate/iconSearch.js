@@ -21,6 +21,9 @@ const providerMapping = {
  * @returns {Array<{ key: string, highlighted: string }>} - List of filtered icon keys with highlighted matches.
  */
 export const filterIcons = (selectedProviders, searchQuery) => {
+
+  // if (!selectedProviders || !searchQuery) return []; // Early return if no selectedProviders or searchQuery
+
   // Step 1: Filter icons by selected providers
   let providerFilteredIcons = Object.keys(iconDescriptor).filter((iconKey) =>
     selectedProviders.some((provider) =>
@@ -32,7 +35,6 @@ export const filterIcons = (selectedProviders, searchQuery) => {
 
   // Debugging output
   console.log('Selected Providers:', selectedProviders);
-  console.log('Filtered Icons:', providerFilteredIcons);
 
   // Step 2: Clean the search query and split by spaces
   const cleanedQuery = searchQuery
@@ -61,8 +63,8 @@ export const filterIcons = (selectedProviders, searchQuery) => {
       highlighted: getHighlightedText(iconKey, cleanedQuery),
     }));
 
-  return searchFilteredIcons;
-};
+    return searchFilteredIcons.length > 0 ? searchFilteredIcons : []; // Return empty array if no matches
+  };
 
 /**
  * Highlights the matched parts of the text.
@@ -76,7 +78,7 @@ const getHighlightedText = (text, searchWords) => {
   searchWords.forEach((word) => {
     if (word) {
       const regex = new RegExp(`(${escapeRegExp(word)})`, 'gi');
-      result = result.replace(regex, '<mark>$1</mark>');
+      result = result.replace(regex, '<mark style="background-color:rgb(220, 220, 220); color: #000; padding: 2px 4px; border-radius: 10px;">$1</mark>');
     }
   });
   return result;

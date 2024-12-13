@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Root variables for light and dark themes */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -14,17 +15,46 @@
   }
 }
 
+/* Base body styles */
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
 }
 
+/* Ensure full-page layout */
+html, body, #__next {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;    /* Allow vertical scrolling */
+  overflow-x: hidden;  /* Prevent horizontal scrolling */
+}
+
+/* Hide scrollbar for all major browsers */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#__next::-webkit-scrollbar {
+  display: none;
+}
+
+html, body, #__next {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge */
+}
+
+/* Transition container for animations */
 .transition-container {
   position: relative;
   overflow: hidden;
 }
 
+/* Slide-out animations */
 .slide-out-to-top {
   animation: slideOutToTop 0.5s forwards;
 }
@@ -33,6 +63,16 @@ body {
   animation: slideOutToBottom 0.5s forwards;
 }
 
+/* Slide-in animations */
+.slide-in-from-top {
+  animation: slideInFromTop 0.5s ease-out;
+}
+
+.slide-in-from-bottom {
+  animation: slideInFromBottom 0.5s ease-out;
+}
+
+/* Keyframes for slide animations */
 @keyframes slideOutToTop {
   to {
     transform: translateY(-100%);
@@ -45,14 +85,6 @@ body {
     transform: translateY(100%);
     opacity: 0;
   }
-}
-
-.slide-in-from-top {
-  animation: slideInFromTop 0.5s ease-out;
-}
-
-.slide-in-from-bottom {
-  animation: slideInFromBottom 0.5s ease-out;
 }
 
 @keyframes slideInFromTop {
@@ -75,4 +107,112 @@ body {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Layout container for editors or specific pages */
+.editor-container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+/* Toolbar styling */
+.toolbar {
+  width: 200px;
+  background: #333;
+  color: #fff;
+  padding: 10px;
+}
+
+/* Edit panel styling */
+.edit-panel {
+  width: 250px;
+  background: #f9f9f9;
+  padding: 10px;
+  border-left: 1px solid #ccc;
+}
+
+/* SVG area styling */
+svg {
+  flex: 1;
+  background: #f0f0f0;
+}
+
+/* Utility class to hide scrollbars in specific containers */
+.scrollbar-hidden {
+  overflow-y: auto;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hidden {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge */
+}
+
+/* Blink animation */
+@keyframes blink {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-blink {
+  animation: blink 3s infinite;
+}
+
+/* Slide-in animation */
+@keyframes slide-in {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  display: inline-block;
+  animation: slide-in 0.5s ease-out forwards;
+}
+
+/* Line reveal animation */
+@keyframes line-reveal {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-line-reveal {
+  animation: line-reveal 0.8s ease-out forwards;
+  margin-bottom: 1rem;
+}
+
+/* Line fade-in animation */
+@keyframes line-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-line-fade-in {
+  animation: line-fade-in 0.8s ease-out forwards;
+  margin-bottom: 0.5rem;
 }

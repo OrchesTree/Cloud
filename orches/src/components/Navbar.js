@@ -5,8 +5,9 @@ import { auth, googleProvider, signInWithPopup } from '@/lib/firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Image from 'next/image';
 
-export default function Navbar() {
+export default function Navbar({ variant = 'default' }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -26,73 +27,102 @@ export default function Navbar() {
       await signInWithPopup(auth, googleProvider);
       toast.success('Successfully signed in!');
     } catch (error) {
-      // Handle specific error codes
       switch (error.code) {
         case 'auth/popup-closed-by-user':
-          console.warn('Popup closed by user before completing sign-in.');
           toast.info('Sign-in popup closed. Please try again.');
           break;
         case 'auth/network-request-failed':
-          console.error('Network error during sign-in:', error);
           toast.error('Network error. Please check your connection and try again.');
           break;
         case 'auth/cancelled-popup-request':
-          console.warn('Popup request was cancelled.');
           toast.info('Sign-in popup request was cancelled. Please try again.');
           break;
         default:
-          console.error('Google Login Error:', error);
           toast.error(`Login failed: ${error.message}`);
       }
     }
   };
-  
+
   // Handle Logout
   const handleLogout = async () => {
     try {
       await signOut(auth);
       toast.info('Logged out successfully!');
     } catch (error) {
-      console.error('Logout Error:', error);
       toast.error('Logout failed!');
     }
   };
 
   return (
-    <nav className="w-full bg-blue-500 p-4 text-white flex justify-between items-center">
-      <div className="text-2xl font-bold cursor-pointer hover:italic" onClick={() => router.push('/')}>
-        OrchesTree
+    <nav
+      className={`w-full p-4 flex justify-between items-center ${
+        variant === 'home' ? 'bg-white text-black' : 'bg-black text-white'
+      }`}
+    >
+      <div
+        className="flex items-center space-x-2 text-2xl font-bold cursor-pointer hover:italic"
+        onClick={() => router.push('/')}
+      >
+        <Image
+          src={variant === 'home' ? '/otlogowhite.png' : '/otlogo.png'}
+          alt="OrchesTree Logo"
+          width={50}
+          height={50}
+          priority
+        />
+        <span>OrchesTree</span>
       </div>
+
       <div className="flex gap-4 items-center">
-        <button onClick={() => router.push('/')} className="hover:font-bold hover:italic">
+        <button onClick={() => router.push('/')} className="hover:font-bold">
           Home
         </button>
-        <button onClick={() => router.push('/generate')} className="hover:font-bold hover:italic">
+        <button onClick={() => router.push('/generate')} className="hover:font-bold">
           Generate
         </button>
-        <button onClick={() => router.push('/editor')} className="hover:font-bold hover:italic">
+        <button onClick={() => router.push('/editor')} className="hover:font-bold">
           Editor
         </button>
 
         {loading ? (
-          <span>Loading...</span>
+          <span>Loading</span>
         ) : user ? (
           <>
-            {user.photoURL && (
-              <img src={user.photoURL} alt="User Avatar" className="w-8 h-8 rounded-full mr-4" />
-            )}
-            <span className="mr-4">Hi, {user.displayName}!</span>
-            <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded hover:bg-red-600">
+            <div className="w-8 h-8">
+              <Image
+                src={user.photoURL || '/default-avatar.png'}
+                alt="User Avatar"
+                width={32}
+                height={32}
+                className="rounded-full"
+                priority
+              />
+            </div>
+            {user.displayName && <span>Hi, {user.displayName}!</span>}
+            <button
+              onClick={handleLogout}
+              className={`px-4 py-1 rounded-full mr-8 ${
+                variant === 'home' ? 'bg-black text-white hover:bg-red-600' : 'bg-white text-black hover:bg-red-600'
+              }`}
+            >
               Logout
             </button>
           </>
         ) : (
-          <button onClick={handleGoogleLogin} className="bg-green-500 px-4 py-2 rounded hover:bg-green-600">
-            Sign in with Google
-          </button>
+          <>
+            {/* Placeholder for user image */}
+            <div className="w-8 h-8 invisible" />
+            <button
+              onClick={handleGoogleLogin}
+              className={`px-4 py-1 rounded-full mr-8 ${
+                variant === 'home' ? 'bg-black text-white hover:bg-green-600' : 'bg-white text-black hover:bg-green-600'
+              }`}
+            >
+              SignIn
+            </button>
+          </>
         )}
       </div>
-      <ToastContainer />
     </nav>
   );
 }
