@@ -9,6 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@svgdotjs/svg.draggable.js": "^3.0.4",
+    "@svgdotjs/svg.filter.js": "^3.0.8",
+    "@svgdotjs/svg.js": "^3.2.4",
+    "@svgdotjs/svg.panzoom.js": "^2.1.2",
+    "@svgdotjs/svg.resize.js": "^2.0.5",
+    "@svgdotjs/svg.select.js": "^4.0.2",
     "core-js": "^3.39.0",
     "firebase": "^11.0.2",
     "firebase-admin": "^13.0.1",
