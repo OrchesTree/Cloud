@@ -5,6 +5,7 @@ import '@svgdotjs/svg.draggable.js';
 import '@svgdotjs/svg.select.js';
 import '@svgdotjs/svg.resize.js';
 import './svg.resize.css';
+import Navbar from '@/components/Navbar';
 
 const EditorPage = () => {
   const svgContainerRef = useRef(null);
@@ -200,11 +201,11 @@ const EditorPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-screen h-screen bg-gray-900 flex items-center justify-center">
-      <h1 className="absolute top-4 left-4 text-white text-2xl z-10">Resizable SVG Elements</h1>
+    <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 via-gray-1000 to-black flex flex-col items-center overflow-y-auto text-white relative h-full">
+      <Navbar />
       <div
         ref={svgContainerRef}
-        className="w-full h-full border border-gray-700 bg-white"
+        className="w-full h-4/5 border bg-black rounded-lg shadow-lg"
       ></div>
     </div>
   );
