@@ -216,3 +216,45 @@ svg {
   animation: line-fade-in 0.8s ease-out forwards;
   margin-bottom: 0.5rem;
 }
+
+
+  body {
+    padding-top: 5rem; /* Adjust based on navbar height */
+    background-color: #000;
+  }
+
+  @keyframes gradient-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+    20% {
+      background-position: 25% 75%;
+    }
+    40% {
+      background-position: 50% 100%;
+    }
+    60% {
+      background-position: 75% 25%;
+    }
+    80% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  .animate-gradient {
+    background: linear-gradient(
+      60deg,               /* Adjusted angle for smoother diagonal transitions */
+      #4B0082,             /* Indigo */
+      #4682B4,             /* Steel Blue */
+      #8A2BE2,             /* Blue Violet */
+      #00008B              /* Dark Blue */
+
+    );
+  
+    background-size: 500% 500%;  /* Increased size for ultra-smooth flow */
+    animation: gradient-flow 10s infinite ease-in-out; /* Longer duration for fluidity */
+  }
+  

@@ -1,44 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
-
-interface Dot {
-  id: number;
-  top: string;
-  left: string;
-  color: string;
-  animationDelay: string;
-}
+import DotBackground from '@/components/DotBackground';
 
 export default function Home() {
-  const [dots, setDots] = useState<Dot[]>([]);
   const [showParagraphs, setShowParagraphs] = useState([false, false, false]);
 
-  useEffect(() => {
-    const colors = [
-      '#ff0000', '#30ff00', '#ffffff', '#c301ff',
-      '#00ddff', '#fe01ad', '#59a700', '#ffee00',
-      '#ffffff', '#ffffff', '#ffffff', '#ffffff',
-    ];
-
-    const generateDots = () => {
-      const newDots = Array.from({ length: 200 }, (_, index) => ({
-        id: index,
-        top: `${Math.random() * 100}vh`,
-        left: `${Math.random() * 100}vw`,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        animationDelay: `${Math.random() * 3}s`,
-      }));
-      setDots(newDots);
-    };
-
-    generateDots();
-
-    const interval = setInterval(generateDots, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Reveal paragraphs sequentially with delays
   useEffect(() => {
     showParagraphs.forEach((_, index) => {
       setTimeout(() => {
@@ -47,43 +14,30 @@ export default function Home() {
           updated[index] = true;
           return updated;
         });
-      }, index * 2000); // Delay each paragraph by 2 seconds
+      }, index * 2000);
     });
   }, []);
 
-  // Function to split a paragraph into lines
   const animateLines = (text: string) =>
     text.split('. ').map((line, index) => (
       <div
         key={index}
         className="opacity-0 animate-line-fade-in"
-        style={{ animationDelay: `${index * 500}ms` }} // Stagger each line by 500ms
+        style={{ animationDelay: `${index * 500}ms` }}
       >
         {line}.
       </div>
     ));
 
   return (
-<div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-gray-900 via-gray-1000 to-black text-white relative overflow-hidden">
-
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-gray-900 via-gray-1000 to-black text-white relative overflow-hidden">
       {/* Navbar */}
-      {/* <Navbar variant="home" /> */}
-      <Navbar />
+        <Navbar />
+        
+      {/* Background Dots */}
+      <DotBackground />
 
-      {/* Blinking Dots */}
-      {dots.map((dot) => (
-        <div
-          key={dot.id}
-          className="absolute w-1 h-1 rounded-full animate-blink"
-          style={{
-            top: dot.top,
-            left: dot.left,
-            backgroundColor: dot.color,
-            animationDelay: dot.animationDelay,
-          }}
-        />
-      ))}
-
+      {/* Content */}
       <div className="max-w-2xl px-1 pt-16 z-10 text-2xl leading-relaxed text-center text-alignment">
         {showParagraphs[0] && (
           <div className="mb-3">

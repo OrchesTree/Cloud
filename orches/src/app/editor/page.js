@@ -9,8 +9,13 @@ const EditorPage = () => {
   const iframeRef = useRef(null);
 
   useEffect(() => {
-    // Ensure this runs only in the browser
-    if (typeof window === 'undefined') return;
+    // Scroll to the top immediately after navigation
+    const handleRouteChange = () => {
+      window.scrollTo(0, 0);
+    };
+
+    // Ensure the page scrolls to the top
+    handleRouteChange();
 
     // Retrieve the SVG data from sessionStorage
     const svgData = sessionStorage.getItem('svgData');
@@ -51,7 +56,7 @@ const EditorPage = () => {
   }, [router]);
 
   return (
-    <div style={{ width: '100%', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
       <Navbar />
       <iframe
         ref={iframeRef}

@@ -55,9 +55,7 @@ export default function Navbar({ variant = 'default' }) {
 
   return (
     <nav
-      className={`w-full p-4 flex justify-between items-center ${
-        variant === 'home' ? 'bg-white text-black' : 'bg-black text-white'
-      }`}
+      className="fixed top-0 left-0 w-full p-4 flex justify-between items-center shadow-md z-50 transition-all duration-100 bg-black bg-opacity-55 backdrop-blur text-white"
     >
       <div
         className="flex items-center space-x-2 text-2xl font-bold cursor-pointer hover:italic"
@@ -80,9 +78,9 @@ export default function Navbar({ variant = 'default' }) {
         <button onClick={() => router.push('/generate')} className="hover:font-bold">
           Generate
         </button>
-        <button onClick={() => router.push('/editor')} className="hover:font-bold">
+        {/* <button onClick={() => router.push('/editor')} className="hover:font-bold">
           Editor
-        </button>
+        </button> */}
 
         {loading ? (
           <span>Loading</span>
@@ -98,7 +96,7 @@ export default function Navbar({ variant = 'default' }) {
                 priority
               />
             </div>
-            {user.displayName && <span>Hi, {user.displayName}!</span>}
+            {user.displayName && <span>Hi, {user.displayName.split(' ')[0]}!</span>}
             <button
               onClick={handleLogout}
               className={`px-4 py-1 rounded-full mr-8 ${
@@ -110,15 +108,12 @@ export default function Navbar({ variant = 'default' }) {
           </>
         ) : (
           <>
-            {/* Placeholder for user image */}
             <div className="w-8 h-8 invisible" />
             <button
               onClick={handleGoogleLogin}
-              className={`px-4 py-1 rounded-full mr-8 ${
-                variant === 'home' ? 'bg-black text-white hover:bg-green-600' : 'bg-white text-black hover:bg-green-600'
-              }`}
+              className={`px-4 py-1 rounded-full ml-1 mr-8 bg-white text-black hover:bg-gray-800 hover:text-white`}
             >
-              SignIn
+              Sign in with Google
             </button>
           </>
         )}
