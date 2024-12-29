@@ -3,43 +3,102 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, googleProvider, signInWithPopup } from '@/lib/firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // Firestore functions
+import { db } from '@/lib/firebaseConfig'; // Firestore instance
 import Image from 'next/image';
 
 export default function Navbar({ variant = 'default' }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [remainingGenerations, setRemainingGenerations] = useState(null); // State for remaining generations
   const router = useRouter();
 
-  // Monitor authentication state
+  // Monitor authentication state and fetch user data
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+
+      if (currentUser) {
+        await initializeUser(currentUser.uid);
+        await resetAndFetchGenerations(currentUser.uid);
+      }
     });
     return () => unsubscribe();
   }, []);
 
+  // Initialize the user document in Firestore if it doesn't exist
+  const initializeUser = async (userId) => {
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (!userSnapshot.exists()) {
+        // Create a new document with default values
+        await setDoc(userDocRef, {
+          generationCount: 0,
+          lastGenerationDate: null,
+        });
+        console.log('New user document created in Firestore.');
+      } else {
+        console.log('User document already exists.');
+      }
+    } catch (error) {
+      console.error('Error initializing user data:', error);
+    }
+  };
+
+  // Reset the generation count if it's a new day and fetch the remaining generations
+  const resetAndFetchGenerations = async (userId) => {
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        const now = new Date();
+        const gmtNow = new Date(now.toISOString().split('T')[0] + 'T00:00:00.000Z');
+        const lastGenerationDate = userData.lastGenerationDate
+          ? new Date(userData.lastGenerationDate)
+          : null;
+
+        let generationCount = userData.generationCount || 0;
+
+        // Reset count if it's a new day
+        if (!lastGenerationDate || lastGenerationDate < gmtNow) {
+          generationCount = 0;
+          await updateDoc(userDocRef, {
+            generationCount: 0,
+            lastGenerationDate: gmtNow.toISOString(),
+          });
+          console.log('Generation count reset for the new day.');
+        }
+
+        const remaining = 3 - generationCount;
+        setRemainingGenerations(remaining);
+      } else {
+        console.warn('User document not found.');
+        setRemainingGenerations(null);
+      }
+    } catch (error) {
+      console.error('Error resetting or fetching user data:', error);
+      setRemainingGenerations(null);
+    }
+  };
+
   // Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-      toast.success('Successfully signed in!');
-    } catch (error) {
-      switch (error.code) {
-        case 'auth/popup-closed-by-user':
-          toast.info('Sign-in popup closed. Please try again.');
-          break;
-        case 'auth/network-request-failed':
-          toast.error('Network error. Please check your connection and try again.');
-          break;
-        case 'auth/cancelled-popup-request':
-          toast.info('Sign-in popup request was cancelled. Please try again.');
-          break;
-        default:
-          toast.error(`Login failed: ${error.message}`);
+      const result = await signInWithPopup(auth, googleProvider);
+      const currentUser = result.user;
+
+      if (currentUser) {
+        await initializeUser(currentUser.uid);
+        await resetAndFetchGenerations(currentUser.uid);
       }
+      console.log('Successfully signed in!');
+    } catch (error) {
+      console.error('Login failed:', error.message);
     }
   };
 
@@ -47,9 +106,10 @@ export default function Navbar({ variant = 'default' }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.info('Logged out successfully!');
+      console.log('Logged out successfully!');
+      setRemainingGenerations(null); // Clear remaining generations on logout
     } catch (error) {
-      toast.error('Logout failed!');
+      console.error('Logout failed!');
     }
   };
 
@@ -78,14 +138,16 @@ export default function Navbar({ variant = 'default' }) {
         <button onClick={() => router.push('/generate')} className="hover:font-bold">
           Generate
         </button>
-        {/* <button onClick={() => router.push('/editor')} className="hover:font-bold">
-          Editor
-        </button> */}
 
         {loading ? (
-          <span>Loading</span>
+          <span>Loading...</span>
         ) : user ? (
           <>
+            {remainingGenerations !== null && (
+              <span className="text-md text-gray-500">
+                Credits {remainingGenerations}
+              </span>
+            )}
             <div className="w-8 h-8">
               <Image
                 src={user.photoURL || '/default-avatar.png'}

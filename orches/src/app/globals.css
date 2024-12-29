@@ -254,7 +254,7 @@ svg {
 
     );
   
-    background-size: 500% 500%;  /* Increased size for ultra-smooth flow */
-    animation: gradient-flow 10s infinite ease-in-out; /* Longer duration for fluidity */
+    background-size: 200% 200%;  /* Increased size for ultra-smooth flow */
+    animation: gradient-flow 5s infinite ease-in-out; /* Longer duration for fluidity */
   }
   

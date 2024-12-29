@@ -50,7 +50,7 @@ export default function Home() {
         {showParagraphs[1] && (
           <div className="mb-8">
             {animateLines(
-              'OrchesTree reveals a deeper order, a hidden architecture that transforms chaos into coherence. Every resource, every cluster, and every relationship is part of a living system — one that must be visualized, understood, and nurtured'
+              'Every resource, every cluster, and every relationship is part of a living system — one that must be visualized, understood, and nurtured'
             )}
           </div>
         )}

@@ -7,8 +7,9 @@ import Navbar from '@/components/Navbar';
 import { generateAndSendJson } from '@/lib/generateRequest';
 import { auth } from '@/lib/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebaseConfig"; // Ensure Firestore is initialized
+
 import { useRouter } from 'next/navigation'; // Import useRouter
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import defaultData from './default_prompt.json';
@@ -140,20 +141,20 @@ const handleDefault = () => {
   const handleGoogleLogin = async () => {
    try {
      await signInWithPopup(auth, googleProvider);
-     toast.success('Successfully signed in!');
+     console.success('Successfully signed in!');
    } catch (error) {
      switch (error.code) {
        case 'auth/popup-closed-by-user':
-         toast.info('Sign-in popup closed. Please try again.');
+         console.info('Sign-in popup closed. Please try again.');
          break;
        case 'auth/network-request-failed':
-         toast.error('Network error. Please check your connection and try again.');
+         console.error('Network error. Please check your connection and try again.');
          break;
        case 'auth/cancelled-popup-request':
-         toast.info('Sign-in popup request was cancelled. Please try again.');
+         console.info('Sign-in popup request was cancelled. Please try again.');
          break;
        default:
-         toast.error(`Login failed: ${error.message}`);
+         console.error(`Login failed: ${error.message}`);
      }
    }
  };
@@ -192,34 +193,70 @@ const handleDefault = () => {
  };
 
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-   e.preventDefault();
-    if (!user) {
-     toast.error('Please sign in to generate the JSON.');
-     return;
-   }
-    setLoadingSubmit(true);
-   setAnimateInputs(true); // Trigger input animation
-    // Trigger the dots animation
-   setShowDots(true);
-    try {
-     const result = await generateAndSendJson(formData);
-     setSvgResponse(result);
-     toast.success('SVG generated and received successfully!');
-      // Store the SVG data in session storage and navigate to the editor page
-     sessionStorage.setItem('svgData', result);
-     router.push('/editor');
-   } catch (error) {
-     toast.error(`Error: ${error.message}`);
-   } finally {
-     setLoadingSubmit(false);
-     setShowDots(false);
-      // Reset the animation after a delay
-     setTimeout(() => setAnimateInputs(false), 1000);
-   }
- };
- 
+ // Handle form submission
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!user) {
+    console.error("Please sign in to generate the JSON.");
+    return;
+  }
+
+  setLoadingSubmit(true);
+  setAnimateInputs(true); // Trigger input animation
+  setShowDots(true); // Trigger the dots animation
+
+  try {
+    // Reference the user's Firestore document
+    const userDocRef = doc(db, "users", user.uid);
+
+    // Fetch the user's document
+    const userSnapshot = await getDoc(userDocRef);
+    if (!userSnapshot.exists()) {
+      throw new Error("User data not found. Please contact support.");
+    }
+
+    const userData = userSnapshot.data();
+    const generationCount = userData.generationCount || 0;
+
+    // Check if the daily limit has been reached
+    if (generationCount >= 3) {
+      console.warn("Daily generation limit reached. Try again tomorrow.");
+      return;
+    }
+
+    // Generate the JSON and wait for the API response
+    console.log("Sending API request...");
+    const result = await generateAndSendJson(formData);
+    setSvgResponse(result);
+
+    console.log("SVG generated and received successfully.");
+
+    // Only after successful response, increment the generation count
+    const updatedGenerationCount = generationCount + 1;
+
+    // Update Firestore with the incremented count
+    await updateDoc(userDocRef, {
+      generationCount: updatedGenerationCount,
+      updatedAt: serverTimestamp(), // Optional: Add a timestamp for auditing purposes
+    });
+
+    console.log(`User's generation count updated to ${updatedGenerationCount} in Firestore.`);
+
+    // Store the SVG data in session storage and navigate to the editor page
+    sessionStorage.setItem("svgData", result);
+    router.push("/editor");
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+  } finally {
+    setLoadingSubmit(false);
+    setShowDots(false);
+
+    // Reset the animation after a delay
+    setTimeout(() => setAnimateInputs(false), 1000);
+  }
+};
+
 
 
  return (
