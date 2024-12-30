@@ -74,7 +74,7 @@ export default function Navbar({ variant = 'default' }) {
           console.log('Generation count reset for the new day.');
         }
 
-        const remaining = 3 - generationCount;
+        const remaining = 1000 - generationCount;
         setRemainingGenerations(remaining);
       } else {
         console.warn('User document not found.');
@@ -109,8 +109,8 @@ export default function Navbar({ variant = 'default' }) {
       console.log('Logged out successfully!');
       setRemainingGenerations(null); // Clear remaining generations on logout
     } catch (error) {
-      console.error('Logout failed!');
-    }
+      console.error('Logout failed:', error.message); // Log the specific error message
+    }    
   };
 
   return (

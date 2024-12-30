@@ -220,7 +220,7 @@ const handleSubmit = async (e) => {
     const generationCount = userData.generationCount || 0;
 
     // Check if the daily limit has been reached
-    if (generationCount >= 3) {
+    if (generationCount >= 1000) {
       console.warn("Daily generation limit reached. Try again tomorrow.");
       return;
     }
@@ -495,15 +495,6 @@ const handleSubmit = async (e) => {
                                    </button>
                                  </div>
                                </div>
-
-
-                             {/* Display Generated SVG */}
-                             {svgResponse && (
-                               <div className="mt-8">
-                                 <h2 className="text-2xl font-bold mb-4">Generated SVG:</h2>
-                                 <div className="p-4 rounded-lg bg-gray-800" dangerouslySetInnerHTML={{ __html: svgResponse }} />
-                               </div>
-                             )}
                            </form>
                            </div>
 
@@ -558,11 +549,13 @@ const handleSubmit = async (e) => {
 
 
    {/* Render DotBackground when showDots is true */}
-   {showDots && (
+   {/* {showDots && (
      <div className="absolute inset-0">
        <DotBackground />
      </div>
-   )}
+   )} */}
+
+
   </div>
 
 

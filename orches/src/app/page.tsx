@@ -16,7 +16,7 @@ export default function Home() {
         });
       }, index * 2000);
     });
-  }, []);
+  }, [showParagraphs]);
 
   const animateLines = (text: string) =>
     text.split('. ').map((line, index) => (

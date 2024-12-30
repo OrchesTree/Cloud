@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export default function DotBackground() {
   const [dots, setDots] = useState([]);
-  const [pageDimensions, setPageDimensions] = useState({ width: 0, height: 0 });
+  const [,setPageDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const colors = [
@@ -13,7 +13,7 @@ export default function DotBackground() {
     ];
 
     const generateDots = (dimensions) => {
-      const newDots = Array.from({ length: 200 }, (_, index) => ({
+      const newDots = Array.from({ length: 100 }, (_, index) => ({
         id: index,
         top: `${Math.random() * dimensions.height}px`, // Full page height in pixels
         left: `${Math.random() * dimensions.width}px`, // Full page width in pixels
@@ -50,7 +50,7 @@ export default function DotBackground() {
       {dots.map((dot) => (
         <div
           key={dot.id}
-          className="absolute w-2 h-2 rounded-full animate-blink"
+          className="absolute w-1 h-1 rounded-full animate-blink"
           style={{
             top: dot.top,
             left: dot.left,

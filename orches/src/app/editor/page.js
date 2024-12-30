@@ -34,7 +34,7 @@ const EditorPage = () => {
         console.log('Posting message to iframe...');
         iframeRef.current.contentWindow.postMessage(
           { type: 'LOAD_SVG', payload: svgData },
-          'http://localhost:9000' // Update this if Method Draw is hosted on another origin
+          'https://methoddraw.redsmoke-440fff59.eastus.azurecontainerapps.io' // Update this if Method Draw is hosted on another origin
         );
       } else {
         console.error('iframeRef or contentWindow is not available.');
@@ -60,7 +60,7 @@ const EditorPage = () => {
       <Navbar />
       <iframe
         ref={iframeRef}
-        src="http://localhost:9000" // Ensure this matches where Method Draw is hosted
+        src="https://methoddraw.redsmoke-440fff59.eastus.azurecontainerapps.io" // Ensure this matches where Method Draw is hosted
         style={{
           width: '100%',
           height: '100%',
