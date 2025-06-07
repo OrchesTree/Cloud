@@ -1,7 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import DotBackground from '@/components/DotBackground';
+
 
 export default function Home() {
   const [showParagraphs, setShowParagraphs] = useState([false, false, false]);

@@ -26,6 +26,7 @@
     "lodash": "^4.17.21",
     "next": "15.0.4",
     "nth-check": "^2.1.1",
+    "pnpm": "^9.15.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-toastify": "^10.0.6",
